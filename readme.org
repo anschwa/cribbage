@@ -1,0 +1,6 @@
+#+TITLE: Cribbage
+#+AUTHOR: Adam Schwartz
+#+DATE: June 13, 2023
+#+OPTIONS: ':true *:true toc:nil num:nil ^:nil
+
+An offline cribbage scoreboard.

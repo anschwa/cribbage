@@ -1,0 +1,15 @@
+{
+  "name": "Cribbage",
+  "short_name": "Cribbage",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "An offline cribbage scoreboard.",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
