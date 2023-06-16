@@ -1,3 +1,14 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .flex {
   display: flex;
 }
@@ -8,4 +19,88 @@
 
 .gap-1 {
   gap: 0.5em;
+}
+.gap-2 {
+  gap: 1em;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.text-lg {
+  font-size: 1.5em;
+}
+
+.text-xl {
+  font-size: 2em;
+}
+
+.text-monospace {
+  font-family: monospace;
+}
+
+.display-none {
+  display: none;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.max-w-sm {
+  max-width: 400px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.my-auto {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.m-2 {
+  margin: 1em;
+}
+
+.mt-4 {
+  margin-top: 2em;
+}
+
+.mb-2 {
+  margin-bottom: 1em;
+}
+
+.p-2 {
+  padding: 1em;
+}
+
+.pt-4 {
+  padding-top: 2em;
+}
+
+.pb-2 {
+  padding-bottom: 1em;
+}
+
+.button {
+  background-color: #777777;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 4px;
+}
+.button:hover {
+  background-color: #666666;
 }

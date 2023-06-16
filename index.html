@@ -10,109 +10,104 @@
     <link rel="stylesheet" href="style.css" />
     <script src="app.js"></script>
 
-    <title>Cribbage</title>
+    <title>Cribbage!</title>
   </head>
-  <body>
-    <header>
-      <h1 class="text-xl">Cribbage</h1>
+  <body class="p-2">
+    <header class="pb-2">
+      <h1 class="text-xl">Cribbage!</h1>
     </header>
 
-    <main role="main" class="">
-      <fieldset>
-        <legend>Players</legend>
-        <label for="twoPlayers">
-          2
-          <input id="twoPlayers" name="numPlayers" type="radio" value="2"/>
-        </label>
+    <main role="main">
+      <div id="game-menu" class="flex flex-col gap-2 max-w-sm mx-auto my-auto">
+        <fieldset class="p-2 flex align-center justify-around">
+          <legend>Players</legend>
 
-        <label for="threePlayers">
-          3
-          <input id="threePlayers" name="numPlayers" type="radio" value="3"/>
-        </label>
+          <label for="twoPlayers">
+            2
+            <input id="twoPlayers" name="numPlayers" type="radio" value="2"/>
+          </label>
 
-        <label for="fourPlayers">
-          4
-          <input id="fourPlayers" name="numPlayers" type="radio" value="4"/>
-        </label>
-      </fieldset>
+          <label for="threePlayers">
+            3
+            <input id="threePlayers" name="numPlayers" type="radio" value="3"/>
+          </label>
 
-      <fieldset>
-        <legend>Score</legend>
-        <label for="fullGame">
-          161
-          <input id="fullGame" name="maxScore" type="radio" value="61"/>
-        </label>
+          <label for="fourPlayers">
+            4
+            <input id="fourPlayers" name="numPlayers" type="radio" value="4"/>
+          </label>
+        </fieldset>
 
-        <label for="halfGame">
-          61
-          <input id="halfGame" name="maxScore" type="radio" value="121"/>
-        </label>
-      </fieldset>
+        <fieldset class="p-2 flex align-cneter justify-around">
+          <legend>Score</legend>
+          <label for="fullGame">
+            161
+            <input id="fullGame" name="maxScore" type="radio" value="61"/>
+          </label>
 
-      <button>Play</button>
+          <label for="halfGame">
+            61
+            <input id="halfGame" name="maxScore" type="radio" value="121"/>
+          </label>
+        </fieldset>
+
+        <button class="button mt-4" onclick="handlePlayButton()">Play</button>
       </div>
 
-      <fieldset class="flex flex-col">
-        <legend>Progress</legend>
+      <div id="game-board" class="display-none">
+        <fieldset class="flex flex-col">
+          <legend>Progress</legend>
 
-        <label for="playerOneProgress">
-          Player 1
-          <input name="playerOneProgress" type="range" value="42" min="0" max="121" list="skunkLines" disabled />
-        </label>
-
-        <label for="playerTwoProgress">
-          Player 2
-          <input name="playerTwoProgress" type="range" value="22" min="0" max="121" list="skunkLines" disabled />
-        </label>
-
-        <datalist id="skunkLines">
-          <option value="61" label="Skunk"></option>
-          <option value="91" label="Double Skunk"></option>
-        </datalist>
-      </fieldset>
-
-      <div class="flex">
-        <fieldset class="flex flex-col gap-1">
-          <legend>Player 1</legend>
-
-          <label for="totalPoints">
-            Total Points:
-            <input name="totalPonits" type="text" value="42" disabled />
+          <label for="playerOneProgress">
+            Player 1
+            <input name="playerOneProgress" type="range" value="42" min="0" max="121" list="skunkLines" disabled />
           </label>
 
-          <label for="prevScore">
-            Previous:
-            <input name="prevScore" type="text" value="2" disabled />
+          <label for="playerTwoProgress">
+            Player 2
+            <input name="playerTwoProgress" type="range" value="22" min="0" max="121" list="skunkLines" disabled />
           </label>
 
-          <label for="nextScore">
-            Next:
-            <input name="nextScore" type="text" inputmode="numeric" value="7" />
-          </label>
-
-          <button>Peg</button>
+          <datalist id="skunkLines">
+            <option value="61" label="Skunk"></option>
+            <option value="91" label="Double Skunk"></option>
+          </datalist>
         </fieldset>
 
-        <fieldset class="flex flex-col gap-1">
-          <legend>Player 2</legend>
+        <div class="flex">
+          <fieldset class="flex flex-col gap-2">
+            <legend>Player 1</legend>
 
-          <label for="totalPoints">
-            Total Points:
-            <input name="totalPonits" type="text" value="22" disabled />
-          </label>
+            <div class="flex gap-1 align-center">
+              <div class="">Total Points:</div>
+              <code class="text-lg text-monospace">42</code>
+            </div>
 
-          <label for="prevScore">
-            Previous:
-            <input name="prevScore" type="text" value="1" disabled />
-          </label>
+            <label for="prevScore" class="flex gap-1">
+              <div>Previous:</div>
+              <input name="prevScore" type="text" value="2" disabled />
 
-          <label for="nextScore">
-            Next:
-            <input name="nextScore" type="text" inputmode="numeric" value="12" />
-          </label>
+              <div>
+                <button>Edit</button>
+                <button class="display-none">Update</button>
+              </div>
+            </label>
 
-          <button>Peg</button>
-        </fieldset>
+            <label for="nextScore" class="flex gap-1">
+              <div>Next:</div>
+              <code class="text-lg text-monospace">0</code>
+
+              <div class="flex gap-1">
+                <button class="">+</button>
+                <button class="">-</button>
+              </div>
+            </label>
+
+            <button class="mt-4 mb-2">Peg</button>
+          </fieldset>
+        </div>
+
+        <button onclick="handleNewGameButton()">New Game</button>
       </div>
     </main>
   </body>
