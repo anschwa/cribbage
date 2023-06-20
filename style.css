@@ -4,10 +4,16 @@
 }
 
 body {
-  touch-action: none;
+  min-width: 200px;
+
+  /* Prevent accidental page-zooming and text selection while
+   interacting with buttons, etc. */
+  touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
 }
+
+fieldset { }
 
 .flex {
   display: flex;
@@ -15,6 +21,14 @@ body {
 
 .flex-col {
   flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-1 {
+  flex: 1;
 }
 
 .gap-1 {
@@ -26,6 +40,14 @@ body {
 
 .align-center {
   align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
 }
 
 .justify-around {
@@ -104,3 +126,7 @@ body {
 .button:hover {
   background-color: #666666;
 }
+.button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+};
