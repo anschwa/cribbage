@@ -19,7 +19,29 @@ const toggleGameBoardAndMenu = () => {
 const handlePlayButton = (event) => {
   event.preventDefault();
 
-  const { numPlayers, maxScore } = getGameMenuFormData();
+  const { numTracks, maxScore } = getGameMenuFormData();
+
+  const gameProgress = g("gameProgress");
+  const gameScores = g("gameScores");
+
+  const progressTmpl = g("progressTmpl");
+  const scoreTmpl = g("scoreTmpl");
+
+  for (let i = 0; i < numTracks; i++) {
+    const trackName = `Track ${i+1}`;
+
+    const progress = progressTmpl.content.cloneNode(true);
+    progress.querySelector(".track-name").textContent = trackName;
+
+    gameProgress.appendChild(progress);
+
+    const score = scoreTmpl.content.cloneNode(true);
+    score.querySelector("legend").textContent = trackName;
+
+    gameScores.appendChild(score);
+  }
+
+  g("maxScore").textContent = maxScore;
 
   toggleGameBoardAndMenu();
 };
@@ -29,13 +51,41 @@ const handleNewGameButton = () => {
     return;
   }
 
+  const gameProgress = g("gameProgress");
+  gameProgress.textContent = "";
+
+  const gameScores = g("gameScores");
+  gameScores.textContent = "";
+
   toggleGameBoardAndMenu();
 };
 
 const getGameMenuFormData = () => {
   const formData = new FormData(g("gameMenu"));
-  const numPlayers = Number(formData.get("numPlayers"));
+  const numTracks = Number(formData.get("numTracks"));
   const maxScore = Number(formData.get("maxScore"));
 
-  return { numPlayers, maxScore };
+  return { numTracks, maxScore };
+};
+
+const handleScoreSubmit = (event) => {
+  event.preventDefault();
+
+  console.log(event);
+};
+
+const handleSlidingScore = (event) => {
+  const { target } = event;
+  const { value, form } = target;
+
+  const nextScore = form.querySelector(".next-score");
+  nextScore.textContent = value;
+};
+
+const handleScoreSelected = (event) => {
+  const { target } = event;
+  const { value, form } = target;
+
+  const pegButton = form.querySelector(".peg-button");
+  pegButton.disabled = Number(value) === 0;
 };

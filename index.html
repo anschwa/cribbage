@@ -12,12 +12,12 @@
 
     <title>Cribbage!</title>
   </head>
-  <body class="p-2">
+  <body class="p-2 min-w-sm">
     <header class="flex align-center justify-between pb-2">
       <h1 class="text-xl">Cribbage!</h1>
       <button
         id="newGameButton"
-        class="display-none"
+        class="p-1 display-none"
         onclick="handleNewGameButton()"
       >New Game</button>
     </header>
@@ -25,148 +25,127 @@
     <main role="main">
       <form
         id="gameMenu"
-        class="flex flex-col gap-2 max-w-sm mx-auto my-auto"
+        class="flex flex-col gap-2 max-w-md mx-auto my-auto"
         onsubmit="handlePlayButton(event)"
       >
         <fieldset class="p-2 flex align-center justify-around">
           <legend>Tracks</legend>
 
-          <label for="twoPlayers">
-            2
-            <input id="twoPlayers" name="numPlayers" type="radio" value="2" checked/>
+          <label>
+            <span>2</span>
+            <input name="numTracks" type="radio" value="2" checked />
           </label>
 
-          <label for="threePlayers">
-            3
-            <input id="threePlayers" name="numPlayers" type="radio" value="3"/>
+          <label>
+            <span>3</span>
+            <input name="numTracks" type="radio" value="3" />
           </label>
 
-          <label for="fourPlayers">
-            4
-            <input id="fourPlayers" name="numPlayers" type="radio" value="4"/>
+          <label>
+            <span>4</span>
+            <input name="numTracks" type="radio" value="4" />
           </label>
         </fieldset>
 
         <fieldset class="p-2 flex align-cneter justify-around">
           <legend>Score</legend>
-          <label for="fullGame">
-            161
-            <input id="fullGame" name="maxScore" type="radio" value="61" checked/>
+          <label>
+            <span>121</span>
+            <input name="maxScore" type="radio" value="121" checked />
           </label>
 
-          <label for="halfGame">
-            61
-            <input id="halfGame" name="maxScore" type="radio" value="121"/>
+          <label>
+            <span>61</span>
+            <input name="maxScore" type="radio" value="61" />
           </label>
         </fieldset>
 
-        <input type="submit" class="button mt-4" value="Play" />
+        <button class="mt-4 p-2">Play</button>
       </form>
 
-      <div id="gameBoard" class="display-none">
-        <div id="gameProgress" class="mb-2">
-          <fieldset class="flex flex-col p-2">
-            <legend>Progress</legend>
+      <div id="gameBoard" class="flex flex-col gap-3 display-none">
+        <fieldset class="p-2">
+          <legend>Progress</legend>
 
-            <label for="playerOneProgress" class="flex gap-1">
-              Team 1
-              <input
-                class="flex-1"
-                name="playerOneProgress"
-                type="range"
-                value="42"
-                min="0"
-                max="121"
-                list="skunkLines"
-                disabled
-              />
-            </label>
+          <datalist id="skunkLines">
+            <option value="61" label="Skunk"></option>
+            <option value="91" label="Double Skunk"></option>
+          </datalist>
 
-            <label for="playerTwoProgress" class="flex gap-1">
-              Team 2
-              <input
-                class="flex-1"
-                name="playerTwoProgress"
-                type="range"
-                value="22"
-                min="0"
-                max="121"
-                list="skunkLines"
-                disabled
-              />
-            </label>
+          <div class="flex align-center gap-1">
+            <div id="gameProgress" class="flex-1"></div>
+            <div id="maxScore" class="monospace"></div>
+          </div>
+        </fieldset>
 
-            <datalist id="skunkLines">
-              <option value="61" label="Skunk"></option>
-              <option value="91" label="Double Skunk"></option>
-            </datalist>
-          </fieldset>
-        </div>
-
-        <div class="flex flex-wrap align-center justify-center gap-1">
-          <fieldset class="flex-1 flex flex-col gap-2 p-2">
-            <legend>Team 1</legend>
-
-            <div class="flex gap-1 align-center">
-              <div class="">Total Points:</div>
-              <code class="text-lg text-monospace">42</code>
-            </div>
-
-            <label for="prevScore" class="flex gap-1">
-              <div>Previous:</div>
-              <input name="prevScore" type="text" value="2" disabled />
-
-              <div>
-                <button>Undo</button>
-                <button class="display-none">Update</button>
-              </div>
-            </label>
-
-            <label for="nextScore" class="flex gap-1">
-              <div>Next:</div>
-              <code class="text-lg text-monospace">0</code>
-
-              <div class="flex gap-1">
-                <button class="">+</button>
-                <button class="">-</button>
-              </div>
-            </label>
-
-            <button class="mt-4 mb-2">Peg</button>
-          </fieldset>
-
-          <fieldset class="flex-1 flex flex-col gap-2 p-2">
-            <legend>Team 2</legend>
-
-            <div class="flex gap-1 align-center">
-              <div class="">Total Points:</div>
-              <code class="text-lg text-monospace">22</code>
-            </div>
-
-            <label for="prevScore" class="flex gap-1">
-              <div>Previous:</div>
-              <input name="prevScore" type="text" value="7" disabled />
-
-              <div>
-                <button>Edit</button>
-                <button class="display-none">Update</button>
-              </div>
-            </label>
-
-            <label for="nextScore" class="flex gap-1">
-              <div>Next:</div>
-              <code class="text-lg text-monospace">0</code>
-
-              <div class="flex gap-1">
-                <button class="">+</button>
-                <button class="">-</button>
-              </div>
-            </label>
-
-            <button class="mt-4 mb-2">Peg</button>
-          </fieldset>
-        </div>
+        <div
+          id="gameScores"
+          class="flex flex-wrap align-center justify-center gap-2"
+        ></div>
       </div>
     </main>
+
+    <template id="progressTmpl">
+      <label class="flex gap-1">
+        <span class="track-name"></span>
+        <input
+          class="flex-1"
+          type="range"
+          value="0"
+          min="0"
+          max="121"
+          list="skunkLines"
+          disabled
+        />
+      </label>
+    </template>
+
+    <template id="scoreTmpl">
+      <form
+        class="flex-1 min-w-sm"
+        onsubmit="handleScoreSubmit(event)"
+      >
+        <fieldset class="flex flex-col gap-2 p-2">
+          <legend></legend>
+
+          <table>
+            <thead>
+              <th class="text-left">Next</th>
+              <th class="text-left">Previous</th>
+              <th class="text-right">Total Points</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="next-score text-left">0</td>
+                <td class="previous-score text-left">7</td>
+                <td class="total-score text-right">42</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="flex flex-col gap-2">
+            <div class="flex gap-1">
+              <span>0</span>
+              <input
+                class="flex-1"
+                name="nextScore"
+                type="range"
+                value="0"
+                min="0"
+                max="29"
+                oninput="handleSlidingScore(event)"
+                onchange="handleScoreSelected(event)"
+              />
+              <span>29</span>
+            </div>
+
+            <div class="flex gap-1">
+              <button class="peg-button p-1 flex-1" disabled>Peg</button>
+              <button class="undo-button p-1" disabled>Undo</button>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </template>
   </body>
 </html>
