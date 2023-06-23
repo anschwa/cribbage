@@ -1,11 +1,8 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8"/>
+    <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="manifest" href="manifest.json" />
-    <!-- <link rel="icon" href="logo.png" /> -->
-    <!-- <link rel="apple-touch-icon" href="logo.png" /> -->
 
     <link rel="stylesheet" href="style.css" />
     <script src="app.js"></script>
@@ -67,11 +64,6 @@
         <fieldset class="p-2">
           <legend>Progress</legend>
 
-          <datalist id="skunkLines">
-            <option value="61" label="Skunk"></option>
-            <option value="91" label="Double Skunk"></option>
-          </datalist>
-
           <div class="flex align-center gap-1">
             <div id="gameProgress" class="flex-1"></div>
             <div id="maxScore" class="monospace"></div>
@@ -88,15 +80,12 @@
     <template id="progressTmpl">
       <label class="flex gap-1">
         <span class="track-name"></span>
-        <input
+        <progress
           class="flex-1"
-          type="range"
           value="0"
           min="0"
           max="121"
-          list="skunkLines"
-          disabled
-        />
+        ></progress>
       </label>
     </template>
 
@@ -108,22 +97,29 @@
         <fieldset class="flex flex-col gap-2 p-2">
           <legend></legend>
 
-          <table>
-            <thead>
-              <th class="text-left">Next</th>
-              <th class="text-left">Previous</th>
-              <th class="text-right">Total Points</th>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="next-score text-left">0</td>
-                <td class="previous-score text-left">7</td>
-                <td class="total-score text-right">42</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="flex align-center justify-between gap-2">
+            <div class="px-2 text-lg">
+              <div class="next-score">0</div>
+            </div>
 
-          <div class="flex flex-col gap-2">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-center pr-2">Previous</th>
+                  <th class="text-center">Total Points</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td class="previous-score text-center">7</td>
+                  <td class="total-score text-center">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex flex-col gap-3">
             <div class="flex gap-1">
               <span>0</span>
               <input
@@ -140,10 +136,25 @@
             </div>
 
             <div class="flex gap-1">
-              <button class="peg-button p-1 flex-1" disabled>Peg</button>
-              <button class="undo-button p-1" disabled>Undo</button>
+              <button class="p-1" value="1" onclick="handleQuickPegButton(event)">1</button>
+              <button class="p-1" value="2" onclick="handleQuickPegButton(event)">2</button>
+              <button class="p-1" value="3" onclick="handleQuickPegButton(event)">3</button>
+
+              <button
+                type="submit"
+                class="peg-button p-1 flex-1"
+                disabled
+              >Peg</button>
+
+              <button
+                class="undo-button p-1"
+                onclick="handleUndoButton(event)"
+                disabled
+              >Undo</button>
             </div>
           </div>
+
+          <input type="hidden" name="progressId" value=""/>
         </fieldset>
       </form>
     </template>
