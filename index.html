@@ -13,93 +13,98 @@
     <header class="flex align-center justify-between pb-2">
       <h1 class="text-xl">Cribbage!</h1>
       <button
-        id="newGameButton"
+        id="newGameBtn"
         class="p-1 display-none"
-        onclick="handleNewGameButton()"
+        onclick="handleGameMenu(event)"
       >New Game</button>
     </header>
 
     <main role="main">
-      <form
-        id="gameMenu"
-        class="flex flex-col gap-2 max-w-md mx-auto my-auto"
-        onsubmit="handlePlayButton(event)"
+      <div id="gameMenu">
+        <form
+          class="flex flex-col gap-2 max-w-md mx-auto my-auto"
+          onsubmit="handleNewGame(event)"
+        >
+          <fieldset class="p-2 flex align-center justify-around">
+            <legend>Tracks</legend>
+
+            <label>
+              <span>2</span>
+              <input name="numTracks" type="radio" value="2" checked />
+            </label>
+
+            <label>
+              <span>3</span>
+              <input name="numTracks" type="radio" value="3" />
+            </label>
+
+            <label>
+              <span>4</span>
+              <input name="numTracks" type="radio" value="4" />
+            </label>
+          </fieldset>
+
+          <fieldset class="p-2 flex align-cneter justify-around">
+            <legend>Score</legend>
+            <label>
+              <span>121</span>
+              <input name="maxScore" type="radio" value="121" checked />
+            </label>
+
+            <label>
+              <span>61</span>
+              <input name="maxScore" type="radio" value="61" />
+            </label>
+          </fieldset>
+
+          <button
+            id="playBtn"
+            type="submit"
+            class="mt-4 p-2"
+          >Play</button>
+        </form>
+      </div>
+
+      <div
+        id="gameBoard"
+        class="flex flex-col gap-3 display-none"
       >
-        <fieldset class="p-2 flex align-center justify-around">
-          <legend>Tracks</legend>
-
-          <label>
-            <span>2</span>
-            <input name="numTracks" type="radio" value="2" checked />
-          </label>
-
-          <label>
-            <span>3</span>
-            <input name="numTracks" type="radio" value="3" />
-          </label>
-
-          <label>
-            <span>4</span>
-            <input name="numTracks" type="radio" value="4" />
-          </label>
-        </fieldset>
-
-        <fieldset class="p-2 flex align-cneter justify-around">
-          <legend>Score</legend>
-          <label>
-            <span>121</span>
-            <input name="maxScore" type="radio" value="121" checked />
-          </label>
-
-          <label>
-            <span>61</span>
-            <input name="maxScore" type="radio" value="61" />
-          </label>
-        </fieldset>
-
-        <button class="mt-4 p-2">Play</button>
-      </form>
-
-      <div id="gameBoard" class="flex flex-col gap-3 display-none">
         <fieldset class="p-2">
           <legend>Progress</legend>
 
           <div class="flex align-center gap-1">
             <div id="gameProgress" class="flex-1"></div>
-            <div id="maxScore" class="monospace"></div>
+            <div id="gameMaxScore"></div>
           </div>
         </fieldset>
 
         <div
-          id="gameScores"
+          id="gameTracks"
           class="flex flex-wrap align-center justify-center gap-2"
         ></div>
       </div>
     </main>
 
-    <template id="progressTmpl">
+    <template id="trackProgressTmpl">
       <label class="flex gap-1">
-        <span class="track-name"></span>
+        <span data-name="trackName"></span>
         <progress
           class="flex-1"
           value="0"
           min="0"
-          max="121"
+          max="0"
         ></progress>
       </label>
     </template>
 
-    <template id="scoreTmpl">
-      <form
-        class="flex-1 min-w-sm"
-        onsubmit="handleScoreSubmit(event)"
-      >
+    <template id="trackScoreTmpl">
+      <form class="flex-1 min-w-sm">
         <fieldset class="flex flex-col gap-2 p-2">
-          <legend></legend>
+          <legend data-name="trackName"></legend>
 
           <div class="flex align-center justify-between gap-2">
             <div class="px-2 text-lg">
-              <div class="next-score">0</div>
+              <div data-name="nextScore">0</div>
             </div>
 
             <table>
@@ -112,8 +117,8 @@
 
               <tbody>
                 <tr>
-                  <td class="previous-score text-center">7</td>
-                  <td class="total-score text-center">0</td>
+                  <td data-name="prevScore" class="text-center">0</td>
+                  <td data-name="totalScore" class="text-center">0</td>
                 </tr>
               </tbody>
             </table>
@@ -129,32 +134,28 @@
                 value="0"
                 min="0"
                 max="29"
-                oninput="handleSlidingScore(event)"
-                onchange="handleScoreSelected(event)"
               />
               <span>29</span>
             </div>
 
             <div class="flex gap-1">
-              <button class="p-1" value="1" onclick="handleQuickPegButton(event)">1</button>
-              <button class="p-1" value="2" onclick="handleQuickPegButton(event)">2</button>
-              <button class="p-1" value="3" onclick="handleQuickPegButton(event)">3</button>
+              <button name="quickPeg" class="p-1" value="1">1</button>
+              <button name="quickPeg" class="p-1" value="2">2</button>
+              <button name="quickPeg" class="p-1" value="3">3</button>
 
               <button
                 type="submit"
-                class="peg-button p-1 flex-1"
+                class="p-1 flex-1"
                 disabled
               >Peg</button>
 
               <button
-                class="undo-button p-1"
-                onclick="handleUndoButton(event)"
+                name="undo"
+                class="p-1"
                 disabled
               >Undo</button>
             </div>
           </div>
-
-          <input type="hidden" name="progressId" value=""/>
         </fieldset>
       </form>
     </template>

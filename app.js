@@ -1,74 +1,94 @@
 // app.js
 
-const g = (selector) => {
-  const el = document.getElementById(selector);
-  return el;
-};
+"use strict";
 
-const toggleDisplayNone = (selector) => {
-  const el = g(selector);
-  el.classList.toggle("display-none");
-};
-
-const toggleGameBoardAndMenu = () => {
-  toggleDisplayNone("gameMenu");
-  toggleDisplayNone("gameBoard");
-  toggleDisplayNone("newGameButton");
-};
-
-const handlePlayButton = (event) => {
+// handleNewGame starts a new cribbage game
+const handleNewGame = (event) => {
   event.preventDefault();
 
-  const { numTracks, maxScore } = getGameMenuFormData(event.target);
+  const { target: gameMenuForm } = event;
+  const { numTracks, maxScore } = getGameData(gameMenuForm);
 
-  const gameProgress = g("gameProgress");
-  const gameScores = g("gameScores");
+  initializeGameState(numTracks, maxScore);
 
-  const progressTmpl = g("progressTmpl");
-  const scoreTmpl = g("scoreTmpl");
-
-  for (let i = 0; i < numTracks; i++) {
-    const trackId = `track-${i+1}`;
-    const trackName = `Track ${i+1}`;
-    const accentName = `accent-${i+1}`;
-
-    const progress = progressTmpl.content.cloneNode(true);
-    progress.querySelector(".track-name").textContent = trackName;
-
-    progress.querySelector("progress").id = trackId;
-    progress.querySelector("progress").classList.add(accentName);
-    progress.querySelector("progress").max = maxScore;
-
-    gameProgress.appendChild(progress);
-
-    const score = scoreTmpl.content.cloneNode(true);
-    score.querySelector('input[type="hidden"]').value = trackId;
-    score.querySelector("legend").textContent = trackName;
-    score.querySelector('input[type="range"]').classList.add(accentName);
-
-    gameScores.appendChild(score);
-  }
-
-  g("maxScore").textContent = maxScore;
-
-  toggleGameBoardAndMenu();
+  GameState.setState("playing");
+  RenderGame();
 };
 
-const handleNewGameButton = () => {
+// handleGameMenu returns to the game menu
+const handleGameMenu = (event) => {
+  event.preventDefault();
+
   if (!window.confirm("New game?")) {
     return;
   }
 
-  const gameProgress = g("gameProgress");
-  gameProgress.textContent = "";
-
-  const gameScores = g("gameScores");
-  gameScores.textContent = "";
-
-  toggleGameBoardAndMenu();
+  GameState.setState("menu");
+  RenderGame();
 };
 
-const getGameMenuFormData = (gameMenuForm) => {
+// GameState stores the global game state.
+const GameState = {
+  state: null,
+  numTracks: null,
+  maxScore: null,
+  winnerTrackId: null,
+  tracks: {},
+
+  setState(state) {
+    this.state = state;
+  },
+  setNumTracks(n) {
+    this.numTracks = n;
+  },
+  setMaxScore(n) {
+    this.maxScore = n;
+  },
+  setTrackData(trackId, data) {
+    if (data.total >= this.maxScore) {
+      this.winnerTrackId = trackId;
+    }
+
+    this.tracks[trackId] = { ...data };
+  },
+  getTrackData(trackId) {
+    return { ...this.tracks[trackId] };
+  },
+  getTrackIds() {
+    return Object.keys(this.tracks);
+  },
+  reset() {
+    this.state = null;
+    this.numTracks = null;
+    this.maxScore = null;
+    this.winnerTrackId = null;
+    this.tracks = {};
+  },
+};
+
+const initializeGameState = (numTracks, maxScore) => {
+  GameState.reset();
+  GameState.setNumTracks(numTracks);
+  GameState.setMaxScore(maxScore);
+
+  for (let i = 1; i < numTracks + 1; i++) {
+    const trackId = `track-${i}`;
+
+    const trackData = {
+      next: 0,
+      prev: 0,
+      total: 0,
+      history: [],
+      peggingDisabled: true,
+      trackName: `Track ${i}`,
+      accentClass: `accent-${i}`,
+    };
+
+    GameState.setTrackData(trackId, trackData);
+  }
+};
+
+const getGameData = (gameMenuForm) => {
   const formData = new FormData(gameMenuForm);
   const numTracks = Number(formData.get("numTracks"));
   const maxScore = Number(formData.get("maxScore"));
@@ -76,69 +96,232 @@ const getGameMenuFormData = (gameMenuForm) => {
   return { numTracks, maxScore };
 };
 
-const handleScoreSubmit = (event) => {
-  event.preventDefault();
+const RenderGame = () => {
+  renderGameMenu();
+  renderGameBoard();
 
-  const form = event.target;
-  const formData = new FormData(form);
-  const nextScore = Number(formData.get("nextScore"));
+  const { winnerTrackId } = GameState;
+  if (winnerTrackId) {
+    const { trackName } = GameState.getTrackData(winnerTrackId);
 
-  const previousScore = form.querySelector(".previous-score");
-  previousScore.textContent = nextScore;
+    const alertFn = () => {
+      window.alert(`${trackName} wins!`);
+    };
 
-  const totalScore = form.querySelector(".total-score");
-  const newScore = Number(totalScore.textContent) + Number(nextScore);;
-  totalScore.textContent = newScore;
+    // Sleep until game board renders last update
+    // TODO: Use <dialog> instead of alert/confirm
+    window.setTimeout(alertFn, 42);
 
-  const progress = g(formData.get("progressId"));
-  progress.value = newScore;
-
-  form.querySelector(".next-score").textContent = 0;
-  form.querySelector('input[type="range"]').value = 0;
-
-  const pegButton = form.querySelector(".peg-button");
-  pegButton.disabled = true;
-
-  const undoButton = form.querySelector(".undo-button");
-  undoButton.disabled = false;
+    // Mutating GameState directly to prevent double dialog when
+    // starting a new game. This is cheating.
+    GameState.winnerTrackId = null;
+  }
 };
 
-const handleSlidingScore = (event) => {
-  const { target } = event;
-  const { value, form } = target;
+const renderGameMenu = () => {
+  const playBtn = g("#playBtn");
 
-  const nextScore = form.querySelector(".next-score");
-  nextScore.textContent = value;
+  switch (GameState.state) {
+  case "menu":
+    playBtn.disabled = false;
+    showGameMenu();
+    return;
+
+  case "playing":
+    playBtn.disabled = true;
+    hideGameMenu();
+    return;
+
+    default:
+    window.alert(`Unknown game state: '${GameState.state}'`);
+  }
 };
 
-const handleScoreSelected = (event) => {
-  const { target } = event;
-  const { value, form } = target;
+const renderGameBoard = () => {
+  switch (GameState.state) {
+  case "menu":
+    hideGameBoard();
+    g("#gameProgress").textContent = "";
+    g("#gameTracks").textContent = "";
+    return;
 
-  const pegButton = form.querySelector(".peg-button");
-  pegButton.disabled = Number(value) === 0;
+  case "playing":
+    g("#gameMaxScore").textContent = GameState.maxScore;
+
+    GameState.getTrackIds().forEach((trackId) => {
+      renderTrackProgress(trackId);
+      renderTrackScore(trackId);
+    });
+
+    showGameBoard();
+    return;
+
+    default:
+    window.alert(`Unknown game state: '${GameState.state}'`);
+  }
 };
 
-const handleQuickPegButton = (event) => {
-  event.preventDefault();
+// renderTrackProgress updates the progress for a trackId if it exists.
+// Otherwise, it creates a new empty progress node.
+const renderTrackProgress = (trackId) => {
+  // Update existing score
+  const trackProgress = g("#gameProgress").querySelector(`[data-track-id="${trackId}"]`);
+  if (trackProgress) {
+    const { total } = GameState.getTrackData(trackId);
 
-  const { target } = event;
-  const { value, form } = target;
-
-  const slider = form.querySelector('input[type="range"]');
-  slider.value = Number(value);
-
-  const nextScore = form.querySelector(".next-score");
-  nextScore.textContent = slider.value;
-
-  const pegButton = form.querySelector(".peg-button");
-  pegButton.disabled = false;
-};
-
-const handleUndoButton = (event) => {
-  event.preventDefault();
-
-  if (!window.confirm("Undo score?")) {
+    trackProgress.value = total;
     return;
   }
-}
+
+  // Create new progress node
+  const tmpl = g("#trackProgressTmpl");
+  const node = tmpl.content.cloneNode(true);
+
+  const { trackName, accentClass } = GameState.getTrackData(trackId);
+  node.querySelector('[data-name="trackName"]').textContent = trackName;
+
+  const progress = node.querySelector("progress");
+  progress.dataset.trackId = trackId;
+  progress.max = GameState.maxScore;
+  progress.value = 0;
+  progress.classList.add(accentClass);
+
+  // Add to DOM
+  g("#gameProgress").appendChild(node);
+};
+
+// renderTrackScore updates the current track score if it exists.
+// Otherwise, it creates a new empty score node.
+const renderTrackScore = (trackId) => {
+  // Update track score
+  const trackScore = g("#gameTracks").querySelector(`[data-track-id="${trackId}"]`);
+  if (trackScore) {
+    const {
+      next,
+      prev,
+      total,
+      history,
+      peggingDisabled,
+    } = GameState.getTrackData(trackId);
+
+    trackScore.querySelector('[data-name="nextScore"]').textContent = next;
+    trackScore.querySelector('[data-name="prevScore"]').textContent = prev;
+    trackScore.querySelector('[data-name="totalScore"]').textContent = total;
+
+    trackScore.querySelector('input[type="range"]').value = next;
+    trackScore.querySelector('button[type="submit"]').disabled = peggingDisabled;
+    trackScore.querySelector('button[name="undo"]').disabled = history.length === 0;
+    return;
+  }
+
+  // Create track score node
+  const tmpl = g("#trackScoreTmpl");
+  const node = tmpl.content.cloneNode(true);
+
+  const form = node.querySelector("form");
+  form.dataset.trackId = trackId;
+
+  const { trackName, accentClass } = GameState.getTrackData(trackId);
+  node.querySelector('[data-name="trackName"]').textContent = trackName;
+
+  // Handle dragging slider
+  const slider = node.querySelector('input[type="range"]');
+  slider.classList.add(accentClass);
+
+  slider.addEventListener("input", (event) => {
+    const trackData = GameState.getTrackData(trackId);
+    trackData.next = Number(event.target.value);
+
+    GameState.setTrackData(trackId, trackData);
+    RenderGame();
+  });
+
+  // Handle slider selection
+  slider.addEventListener("change", (event) => {
+    const trackData = GameState.getTrackData(trackId);
+    trackData.peggingDisabled = Number(event.target.value) === 0;
+
+    GameState.setTrackData(trackId, trackData);
+    RenderGame();
+  });
+
+  // Handle form submit
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const nextScore = Number(formData.get("nextScore"));
+
+    const trackData = GameState.getTrackData(trackId);
+    const { next, prev, total } = trackData;
+
+    trackData.history.push({ next, prev, total });
+    trackData.next = 0;
+    trackData.prev = next;
+    trackData.total += nextScore;
+    trackData.peggingDisabled = true;
+
+    GameState.setTrackData(trackId, trackData);
+    RenderGame();
+  });
+
+  // Handle undo score
+  form.querySelector('button[name="undo"]').addEventListener("click", (event) => {
+    event.preventDefault();
+
+    if (!window.confirm("Undo?")) {
+      return;
+    }
+
+    const trackData = GameState.getTrackData(trackId);
+    const { next, prev, total } = trackData.history.pop();
+
+    trackData.next = next;
+    trackData.prev = prev;
+    trackData.total = total;
+
+    GameState.setTrackData(trackId, trackData);
+    RenderGame();
+  });
+
+  node.querySelectorAll('button[name="quickPeg"]').forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const { target: { value } } = event;
+
+      const trackData = GameState.getTrackData(trackId);
+      trackData.next += Number(value);
+      trackData.peggingDisabled = false;
+
+      GameState.setTrackData(trackId, trackData);
+      RenderGame();
+    });
+  });
+
+  // Add to DOM
+  g("#gameTracks").appendChild(node);
+};
+
+const showGameMenu = () => showElement("#gameMenu");
+const hideGameMenu = () => hideElement("#gameMenu");
+
+const showGameBoard = () => {
+  showElement("#gameBoard");
+  showElement("#newGameBtn");
+};
+
+const hideGameBoard = () => {
+  hideElement("#gameBoard");
+  hideElement("#newGameBtn");
+};
+
+const showElement = (selector) => {
+  g(selector).classList.remove("display-none");
+};
+
+const hideElement = (selector) => {
+  g(selector).classList.add("display-none");
+};
+
+const g = (selector) => document.querySelector(selector);
