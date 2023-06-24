@@ -1,0 +1,12 @@
+{
+  "name": "Cribbage!",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "white",
+  "icons": [
+    {
+      "src": "touch-icon.png",
+      "sizes": "512x512"
+    }
+  ]
+}
