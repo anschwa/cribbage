@@ -85,6 +85,21 @@
       </div>
     </main>
 
+    <dialog
+      id="confirmDialog"
+      class="p-4 mx-auto mt-4 min-w-sm max-w-md border-none radius-2 box-shadow"
+    >
+      <form method="dialog" class="text-center">
+        <div data-name="title" class="text-xl"></div>
+        <div data-name="message"></div>
+
+        <div class="mt-4 flex gap-2">
+          <button name="cancel" class="flex-1">Cancel</button>
+          <button type="submit" class="flex-1">OK</button>
+        </div>
+      </form>
+    </dialog>
+
     <template id="trackProgressTmpl">
       <label class="flex gap-1">
         <span data-name="trackName"></span>

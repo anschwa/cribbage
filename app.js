@@ -19,12 +19,13 @@ const handleNewGame = (event) => {
 const handleGameMenu = (event) => {
   event.preventDefault();
 
-  if (!window.confirm("New game?")) {
-    return;
-  }
-
-  GameState.setState("menu");
-  RenderGame();
+  renderConfirm({
+    title: "New Game?",
+    onConfirm: () => {
+      GameState.setState("menu");
+      RenderGame();
+    },
+  });
 };
 
 // GameState stores the global game state.
@@ -32,7 +33,6 @@ const GameState = {
   state: null,
   numTracks: null,
   maxScore: null,
-  winnerTrackId: null,
   tracks: {},
 
   setState(state) {
@@ -46,7 +46,7 @@ const GameState = {
   },
   setTrackData(trackId, data) {
     if (data.total >= this.maxScore) {
-      this.winnerTrackId = trackId;
+      data.peggingDisabled = true;
     }
 
     this.tracks[trackId] = { ...data };
@@ -61,7 +61,6 @@ const GameState = {
     this.state = null;
     this.numTracks = null;
     this.maxScore = null;
-    this.winnerTrackId = null;
     this.tracks = {};
   },
 };
@@ -99,23 +98,6 @@ const getGameData = (gameMenuForm) => {
 const RenderGame = () => {
   renderGameMenu();
   renderGameBoard();
-
-  const { winnerTrackId } = GameState;
-  if (winnerTrackId) {
-    const { trackName } = GameState.getTrackData(winnerTrackId);
-
-    const alertFn = () => {
-      window.alert(`${trackName} wins!`);
-    };
-
-    // Sleep until game board renders last update
-    // TODO: Use <dialog> instead of alert/confirm
-    window.setTimeout(alertFn, 42);
-
-    // Mutating GameState directly to prevent double dialog when
-    // starting a new game. This is cheating.
-    GameState.winnerTrackId = null;
-  }
 };
 
 const renderGameMenu = () => {
@@ -208,9 +190,16 @@ const renderTrackScore = (trackId) => {
     trackScore.querySelector('[data-name="prevScore"]').textContent = prev;
     trackScore.querySelector('[data-name="totalScore"]').textContent = total;
 
-    trackScore.querySelector('input[type="range"]').value = next;
+    const range = trackScore.querySelector('input[type="range"]');
+    range.value = next;
+
     trackScore.querySelector('button[type="submit"]').disabled = peggingDisabled;
-    trackScore.querySelector('button[name="undo"]').disabled = history.length === 0;
+    trackScore.querySelector('button[name="undo"]').disabled = (history.length === 0);
+
+    trackScore.querySelectorAll('button[name="quickPeg"]').forEach((btn) => {
+      btn.disabled = (next >= range.max);
+    });
+
     return;
   }
 
@@ -253,13 +242,24 @@ const renderTrackScore = (trackId) => {
     const nextScore = Number(formData.get("nextScore"));
 
     const trackData = GameState.getTrackData(trackId);
-    const { next, prev, total } = trackData;
+    const { next, prev, total, trackName } = trackData;
 
     trackData.history.push({ next, prev, total });
     trackData.next = 0;
     trackData.prev = next;
     trackData.total += nextScore;
     trackData.peggingDisabled = true;
+
+    if (trackData.total >= GameState.maxScore) {
+      renderConfirm({
+        title: `${trackName} Wins!`,
+        confirmText: "New Game",
+        onConfirm: () => {
+          GameState.setState("menu");
+          RenderGame();
+        },
+      });
+    }
 
     GameState.setTrackData(trackId, trackData);
     RenderGame();
@@ -269,19 +269,21 @@ const renderTrackScore = (trackId) => {
   form.querySelector('button[name="undo"]').addEventListener("click", (event) => {
     event.preventDefault();
 
-    if (!window.confirm("Undo?")) {
-      return;
-    }
+    renderConfirm({
+      title: "Undo?",
+      onConfirm: () => {
+        const trackData = GameState.getTrackData(trackId);
+        const { next, prev, total } = trackData.history.pop();
 
-    const trackData = GameState.getTrackData(trackId);
-    const { next, prev, total } = trackData.history.pop();
+        trackData.next = next;
+        trackData.prev = prev;
+        trackData.total = total;
+        trackData.peggingDisabled = false;
 
-    trackData.next = next;
-    trackData.prev = prev;
-    trackData.total = total;
-
-    GameState.setTrackData(trackId, trackData);
-    RenderGame();
+        GameState.setTrackData(trackId, trackData);
+        RenderGame();
+      },
+    });
   });
 
   node.querySelectorAll('button[name="quickPeg"]').forEach((btn) => {
@@ -301,6 +303,54 @@ const renderTrackScore = (trackId) => {
 
   // Add to DOM
   g("#gameTracks").appendChild(node);
+};
+
+const renderConfirm = (params) => {
+  const {
+    title,
+    message,
+    confirmText,
+    cancelText,
+    onConfirm,
+  } = params;
+
+  const dialog = g("#confirmDialog");
+  const confirm = dialog.querySelector('button[type="submit"]');
+  const cancel = dialog.querySelector('button[name="cancel"]');
+  const dialogTitle = dialog.querySelector('[data-name="title"]');
+  const dialogMessage = dialog.querySelector('[data-name="message"]');
+
+  if (title) {
+    dialogTitle.textContent = title;
+  }
+
+  if (message) {
+    dialogMessage.textContent = message;
+  }
+
+  if (confirmText) {
+    confirm.textContent = confirmText;
+  }
+
+  if (cancelText) {
+    cancel.textContent = cancelText;
+  }
+
+  // Handle confirm
+  confirm.addEventListener("click", onConfirm);
+
+  // Cleanup
+  dialog.addEventListener("close", () => {
+    dialogTitle.textContent = "";
+    dialogMessage.textContent = "";
+    confirm.textContent = "OK";
+    cancel.textContent = "Cancel"
+
+    confirm.removeEventListener("click", onConfirm);
+  });
+
+  // Display dialog
+  dialog.showModal();
 };
 
 const showGameMenu = () => showElement("#gameMenu");

@@ -3,6 +3,7 @@
   padding: 0;
   font-size: 100%;
   font-family: monospace;
+  box-sizing: border-box;
 }
 
 body {
@@ -16,6 +17,10 @@ body {
 .accent-2 { accent-color: red }
 .accent-3 { accent-color: green }
 .accent-4 { accent-color: orange }
+
+.box-shadow {
+  box-shadow: 0 0 #000, 0 0 #000, 0 24px 48px -12px rgba(0, 0, 0, 0.25);
+}
 
 .flex { display: flex; }
 
@@ -34,6 +39,10 @@ body {
 .justify-center { justify-content: center; }
 .justify-between { justify-content: space-between; }
 .justify-around { justify-content: space-around; }
+
+.border-none { border: none; }
+
+.radius-2 { border-radius: 16px; }
 
 .text-lg { font-size: 150%; }
 .text-xl { font-size: 200%; }
@@ -63,6 +72,8 @@ body {
 
 .p-1 { padding: 8px; }
 .p-2 { padding: 16px; }
+.p-3 { padding: 24px; }
+.p-4 { padding: 32px; }
 
 .pb-2 { padding-bottom: 16px; }
 
